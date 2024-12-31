@@ -2,7 +2,9 @@ from flask import Flask, request, jsonify, send_file
 import os
 from datetime import datetime
 import requests
+import logging
 
+# Initialize Flask app
 app = Flask(__name__)
 
 # Ensure a logs directory exists
@@ -10,7 +12,10 @@ LOG_DIR = "logs"
 if not os.path.exists(LOG_DIR):
     os.makedirs(LOG_DIR)
 
-# Geolocation API configuration (example: ip-api)
+# Configure logging to output to console (for Render logs)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+
+# Geolocation API configuration
 GEOLOCATION_API_URL = "http://ip-api.com/json"
 
 # Default route for the root URL
@@ -30,7 +35,7 @@ def home():
 @app.route('/track')
 def track():
     # Extract user details
-    user_ip = request.remote_addr
+    user_ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0]
     user_agent = request.headers.get('User-Agent', 'Unknown')
     referrer = request.referrer or 'Direct'
     user_id = request.args.get('user', 'Unknown')  # Optional user identifier
@@ -42,6 +47,8 @@ def track():
         response = requests.get(f"{GEOLOCATION_API_URL}/{user_ip}")
         if response.status_code == 200:
             location_data = response.json()
+        else:
+            location_data = {"error": "Failed to fetch geolocation data"}
     except Exception as e:
         location_data = {"error": str(e)}
 
@@ -60,15 +67,21 @@ def track():
     with open(os.path.join(LOG_DIR, "access_logs.txt"), "a") as log_file:
         log_file.write(log_line)
 
+    # Log to Render logs
+    logging.info(f"Log entry: {log_entry}")
+
     # Serve a transparent tracking pixel
     return send_file("static/transparent.png", mimetype="image/png")
 
 # Route to view logs (secured)
 @app.route('/view-logs', methods=['GET'])
 def view_logs():
-    with open(os.path.join(LOG_DIR, "access_logs.txt"), "r") as log_file:
-        logs = log_file.read()
-    return jsonify({"logs": logs})
+    try:
+        with open(os.path.join(LOG_DIR, "access_logs.txt"), "r") as log_file:
+            logs = log_file.read()
+        return jsonify({"logs": logs})
+    except FileNotFoundError:
+        return jsonify({"error": "Log file not found"}), 404
 
 # Health check (useful for deployment testing)
 @app.route('/health')
