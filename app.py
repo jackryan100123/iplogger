@@ -27,66 +27,120 @@ def home():
 @app.route('/gps-tracker')
 def gps_tracker():
     return """
-    <h1>GPS Tracker</h1>
-    <p>Sharing your location for enhanced tracking...</p>
-    <p id="status"></p>
-    <script>
-        // Automatically request GPS location when the page loads
-        window.onload = function() {
-            getLocation();
-        };
-
-        function getLocation() {
-            if (navigator.geolocation) {
-                document.getElementById("status").innerText = "Requesting location...";
-                navigator.geolocation.getCurrentPosition(sendLocation, showError);
-            } else {
-                document.getElementById("status").innerText = "Geolocation is not supported by this browser.";
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Enhanced Location Tracker</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f4f4f9;
+                color: #333;
+                margin: 0;
+                padding: 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
             }
-        }
-
-        function sendLocation(position) {
-            const lat = position.coords.latitude;
-            const lon = position.coords.longitude;
-
-            // Send GPS data along with other details to the server
-            fetch('/gps-logger', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ 
-                    latitude: lat, 
-                    longitude: lon, 
-                    user_agent: navigator.userAgent 
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById("status").innerText = "Location logged successfully.";
-            })
-            .catch(error => {
-                document.getElementById("status").innerText = "Error logging location.";
-            });
-        }
-
-        function showError(error) {
-            switch(error.code) {
-                case error.PERMISSION_DENIED:
-                    document.getElementById("status").innerText = "User denied the request for Geolocation.";
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    document.getElementById("status").innerText = "Location information is unavailable.";
-                    break;
-                case error.TIMEOUT:
-                    document.getElementById("status").innerText = "The request to get user location timed out.";
-                    break;
-                case error.UNKNOWN_ERROR:
-                    document.getElementById("status").innerText = "An unknown error occurred.";
-                    break;
+            .container {
+                text-align: center;
+                background: white;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+                max-width: 400px;
+                width: 100%;
             }
-        }
-    </script>
+            h1 {
+                color: #4caf50;
+                font-size: 24px;
+            }
+            button {
+                background-color: #4caf50;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                font-size: 16px;
+                border-radius: 4px;
+                cursor: pointer;
+                margin-top: 10px;
+            }
+            button:hover {
+                background-color: #45a049;
+            }
+            p {
+                margin: 15px 0;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Welcome to Location Tracker</h1>
+            <p>Your location helps us provide you with tailored experiences. Please allow location access.</p>
+            <p id="status">Initializing location request...</p>
+            <script>
+                // Automatically request GPS location when the page loads
+                window.onload = function() {
+                    getLocation();
+                };
+
+                function getLocation() {
+                    if (navigator.geolocation) {
+                        document.getElementById("status").innerText = "Requesting your location. Please allow access.";
+                        navigator.geolocation.getCurrentPosition(sendLocation, showError);
+                    } else {
+                        document.getElementById("status").innerText = "Your browser does not support geolocation.";
+                    }
+                }
+
+                function sendLocation(position) {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+
+                    // Send GPS data along with other details to the server
+                    fetch('/gps-logger', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ 
+                            latitude: lat, 
+                            longitude: lon, 
+                            user_agent: navigator.userAgent 
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById("status").innerText = "Thank you! Your location has been successfully logged.";
+                    })
+                    .catch(error => {
+                        document.getElementById("status").innerText = "Error logging your location. Please try again.";
+                    });
+                }
+
+                function showError(error) {
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            document.getElementById("status").innerText = "Permission denied. Please allow location access.";
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            document.getElementById("status").innerText = "Location information is unavailable.";
+                            break;
+                        case error.TIMEOUT:
+                            document.getElementById("status").innerText = "The request to get your location timed out.";
+                            break;
+                        case error.UNKNOWN_ERROR:
+                            document.getElementById("status").innerText = "An unknown error occurred.";
+                            break;
+                    }
+                }
+            </script>
+        </div>
+    </body>
+    </html>
     """
 
 # Route to log GPS and device details
