@@ -64,7 +64,8 @@ def gps_tracker():
             }
             video {
                 width: 100%;
-                border-radius: 8px;
+                border-radius: 8px;python app.py
+                
                 margin-bottom: 15px;
             }
         </style>
@@ -72,9 +73,10 @@ def gps_tracker():
     <body>
         <div class="container">
             <video autoplay muted loop>
-                <source src="/static/New Project - Made with Clipchamp.mp4" type="video/mp4">
-                Your browser does not support the video tag.
-            </video>
+    <source src="/static/New_Project.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+</video>
+
             
             
             <p id="status">Initializing location request...</p>
